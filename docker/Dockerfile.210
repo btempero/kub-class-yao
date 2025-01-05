@@ -1,0 +1,74 @@
+# Base Image
+FROM nvcr.io/nvidia/pytorch:24.04-py3
+USER root
+# System Updates and Essential Tools
+RUN apt-get update && apt-get install -y \
+    software-properties-common \ 
+    build-essential \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install JupyterHub dependencies 
+RUN pip install --upgrade pip setuptools
+RUN pip install jupyterhub jupyterlab
+ENV DEBIAN_FRONTEND=noninteractive 
+
+
+#RUN apt-get update
+#RUN apt-get install -y --no-install-recommends \
+#    nvidia-driver-535 \
+#    nvidia-utils-535 \
+#    libnvidia-compute-535 dkms
+#RUN   apt-get update && apt-get install -y linux-headers-$(uname -r)
+
+# Install CUDA Toolkit (if needed)
+#RUN apt-get install -y --no-install-recommends \
+#    cuda-toolkit-12-2
+
+    # Rebuild the kernel module (run after driver installation)
+#RUN dkms install -m nvidia -v 535.54.03
+
+#RUN modprobe nvidia
+#RUN modprobe nvidia-uvm
+
+# Set environment variables
+ENV PATH=/usr/local/cuda-12.2/bin${PATH:+:${PATH}}
+ENV LD_LIBRARY_PATH=/usr/local/cuda-12.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+
+
+# Explicitly upgrade typing_extensions to avoid compatibility issues
+RUN python -m pip install --upgrade typing_extensions
+
+# Install scientific packages
+#RUN python -m pip install numpy pandas matplotlib seaborn scikit-learn
+
+ENV PATH=/usr/local/bin/:$PATH
+# Install JupyterHub and JupyterLab
+#RUN python3 -m pip install --no-cache-dir \
+#    jupyterlab==4.0.7     jupyter_server==2.8.0
+
+# Set the working directory within the container\
+ENV PATH=/usr/local/bin:${PATH}
+ENV DEBUG_MODE "Enabled"
+RUN which jupyterhub-singleuser || echo "jupyterhub-singleuser not found"
+
+ARG NB_USER=jovyan
+ARG NB_UID=1000 
+ENV USER ${NB_USER}
+ENV HOME /home/${NB_USER}
+RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
+
+RUN python3 -m pip install --upgrade pip
+#RUN python3 -m pip install tensorflow==1.6.0
+# Explicitly upgrade typing_extensions to avoid compatibility issues
+RUN python -m pip install --upgrade typing_extensions
+#RUN python -m pip install --upgrade numpy pandas matplotlib scikit-learn
+
+USER ${NB_USER}
+WORKDIR /home/${NB_USER}
+
+# Set the entrypoint for JupyterHub integration
+#ENTRYPOINT ["tini" "-g" "--"]
+#CMD ["start.sh"]

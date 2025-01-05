@@ -1,0 +1,220 @@
+global:
+ imagePullSecrets: 
+    - my-registry-secret
+
+# JupyterHub Configuration
+jupyterhub:
+  proxy:
+    secretToken: ce065069680ad88ff24caada1be8d807b8c5cdc61fbdd681f16887d642d32b8d
+    service:
+      type: LoadBalancer
+      #loadBalancerIP: 34.123.191.152
+      annotations:
+        # Enable Google Cloud Network Endpoint Groups (NEGs)
+        cloud.google.com/neg: '{"ingress": true}' 
+  hub:
+    extraConfig:
+      jupyterhub_config.py: |
+        c.JupyterHub.hub_connect_ip = 'hub' #replace this name with what your pod sees the hub 
+        c.JupyterHub.hub_ip = '0.0.0.0'   #this tells jupyterhub to listen on all ips.
+    db:
+      type: postgres
+      url: postgresql://usernameCHANGE:passwordCHANGE@jupyter-postgresql:5432/jupyterhub
+    config:
+      Authenticator:
+        admin_users:
+          - 'admin'
+      JupyterHub:
+        authenticator_class: nativeauthenticator.NativeAuthenticator
+        cookie_secret: "b4f298f5a7444ba1fc6ac361a7f439bf1562acfbc8a3d8b9b21c599bd0c16127"
+        log_level: "DEBUG"
+        services:
+          cull:
+            # Cull idle servers and users
+            admin_users: ['admin']
+            serviceAccountName: jupyterhub-idle-culler 
+            cull_every: 301 # Interval (in seconds) for checking for idle servers to cull
+            cull_idle_timeout: 3600 # Idle timeout (in seconds)
+            cull_max_age: 0 # Don't consider age
+            cull_users: true # Set to true if you want to cull users as well as servers
+      NativeAuthenticator:
+        open_signup: false
+        allowed_failed_logins: 5
+        seconds_before_next_try: 300
+
+  singleuser:
+    startTimeout: 600
+    storage:
+      type: dynamic
+      capacity: 10Gi
+      dynamic:
+        storageClass: standard # Adjust this to match your cluster's provisioner
+      
+    profileList:
+      - display_name: "Pytorch"
+        description: "Pytorch environment"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/pytorch
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+          extra_resource_guarantees:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+      - display_name: "Tensorflow 2.15"
+        description: "Tensorflow 2.15"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/tf-215
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+          extra_resource_guarantees:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+      - display_name: "Tensorflow 2.13.1"
+        description: "Tensorflow 2.13.1"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/tf-213
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+      - display_name: "Tensorflow 2.10"
+        description: "Tensorflow 2.10"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/tf-210
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+          extra_resource_guarantees:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+      - display_name: "Tensorflow 2.7.1"
+        description: "Tensorflow 2.7.1"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/tf-27
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+          extra_resource_guarantees:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+      - display_name: "Tensorflow 1.15.5"
+        description: "Tensorflow 1.15.5"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/tf-15
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+          extra_resource_guarantees:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+      - display_name: "Tensorflow 1.6.0"
+        description: "Tensorflow 1.6.0"
+        default: true
+        kubespawner_override:
+          image: gcr.io/sdss-ching-yao/my-repo/tf-16
+          cpu_guarantee: 14
+          mem_guarantee: "35G" 
+          tolerations:         
+              - key: "nvidia.com/gpu"
+                operator: "Equal"
+                value: "present"
+                effect: "NoSchedule" 
+          extra_resource_limits:
+              nvidia.com/gpu: 1
+          extra_resource_guarantees:
+              nvidia.com/gpu: 1
+        extraConfig:
+          dockerd:
+            defaultRuntime: nvidia
+  prePuller:
+    hook:
+      enabled: false
+
+postgresql:
+
+  image:
+    tag: latest
+
+  global:
+    storageClass: "standard"  # Optionally specify a global storage class
+
+  postgresql:
+    image:
+      tag: "13.3.0-debian-10-r22"  # Use an appropriate tag
+
+  auth:
+    enablePostgresUser: true
+    username: "usernameCHANGE"
+    password: "passwordCHANGE"
+    database: "jupyterhub"
+
+  persistence:
+    enabled: true
+    size: "2Gi"  # Adjust size according to your needs
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "300m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+  volumePermissions:
+    enabled: true  # Adjust permissions if running on restricted environments like OpenShift

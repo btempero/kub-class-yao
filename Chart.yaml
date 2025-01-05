@@ -1,0 +1,17 @@
+apiVersion: v2
+name: jupyter_research
+description: A Helm chart for jupyterhub with postgresql
+
+type: application
+version: 0.1.0
+
+appVersion: "1.16.0"
+dependencies: # A list of the chart requirements (optional)
+  - name: jupyterhub
+    version: 3.3.7
+    repository: https://jupyterhub.github.io/helm-chart/
+  - name: postgresql
+    version: 15.2.5
+    repository:  https://charts.bitnami.com/bitnami/
+
+
